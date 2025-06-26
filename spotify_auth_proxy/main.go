@@ -26,6 +26,7 @@ var (
 	source oauth2.TokenSource
 	envCfg *EnvConfig
 	token  string
+	
 	config *oauth2.Config
 )
 
@@ -67,11 +68,13 @@ func main() {
 		Scopes: []string{
 			"user-read-email",
 			"user-read-private",
+			// "playlist-read-collaborative",
 			"playlist-read-private",
 			"playlist-modify-private",
 			"playlist-modify-public",
 			"user-library-read",
 			"user-library-modify",
+			// "ugc-image-upload",
 		},
 	}
 
@@ -94,6 +97,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(listenAddr, nil))
 }
 
+// APIToken is the endpoint for refreshing API tokens
 func APIToken(w http.ResponseWriter, r *http.Request) {
 	username, password, ok := r.BasicAuth()
 	if !ok || username != id || password != envCfg.APIKey {
@@ -123,6 +127,7 @@ func APIToken(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Token Retrieved")
 }
 
+// Authorize takes a user through the auth flow to get a new access token
 func Authorize(w http.ResponseWriter, r *http.Request) {
 	key := r.FormValue("token")
 	if key != token {
@@ -139,6 +144,7 @@ func Authorize(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, config.AuthCodeURL(state), http.StatusSeeOther)
 }
 
+// SpotifyCallback handles the redirect from spotify after authorizing
 func SpotifyCallback(w http.ResponseWriter, r *http.Request) {
 	if err := r.FormValue("error"); err != "" {
 		fmt.Fprintf(w, "Could not complete authorization: %s\n", err)
